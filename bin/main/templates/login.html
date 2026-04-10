@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<h1> login page....</h1>
+	
+	<form id="form">
+		<input type="text" name="username" placeholder="id">
+		<input type="text" name="password" placeholder="pw">
+		<button type="button" onclick="login()">로그인</button>
+	</form>
+	<div id="result"></div>
+	
+	<script>
+		const form =document.querySelector("#form");
+		const result =document.querySelector("#result");
+		
+		function login(){
+			const formData =new FormData(form);
+			const data =Object.fromEntries(formData);
+			
+			fetch("/loginProc",{
+				method: "post",
+				headers:{
+					"Content-Type":"application/json"
+				},
+				body: JSON.stringify(data)
+			})
+			.then(res =>{
+				if(res.ok){
+					return res.json()
+					.then(data =>{
+						localStorage.setItem("token",data.token);
+						console.log(data);
+						location.href = data.role === "ADMIN" ? "/adminpage" : "/userpage";
+					})
+				}
+				else{
+					return res.json()
+					.then(data =>{
+						console.error(data.error);
+						result.innerHTML=data.error;
+					})
+					
+				}
+			})
+			.catch(error => console.error("네트워크 오류:", error));
+			
+			
+			
+			
+			
+		}
+	
+	
+	</script>
+	
+	
+	
+</body>
+</html>

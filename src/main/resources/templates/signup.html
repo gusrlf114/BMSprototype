@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<h1> 회원등록</h1>
+	<form id="form">
+		<input type="text" name="username" placeholder="username" required><br>
+		<input type="text" name="password" placeholder="password" required><br>
+		<select name="role">
+			<option value="USER">user</option>
+			<option value="ADMIN">admin</option>
+		</select><br>
+		<button type="button" onclick="f1()">회원가입</button>
+	</form>
+	<a th:href="@{/login}">로그인</a>
+	
+	<script>
+		const form =document.querySelector("#form");
+		
+		function f1(){
+			const formData =new FormData(form);
+			const data =Object.fromEntries(formData);
+			
+			fetch("/register",{
+				method : "POST",
+				headers: {
+			        "Content-Type": "application/json"
+			    },
+				body : JSON.stringify(data)
+			})
+			.then(res => {
+			    if(res.ok){ 
+			        return res.json()
+			        .then(data => {
+			            console.log(data.message);
+			            alert(data.message);
+			            location.href="/login";
+			        });
+			    } 
+			    else {
+			        return res.json()
+			        .then(data => {
+			            console.error(data.error);
+			        });
+			    }
+			})
+			.catch(error => console.error("네트워크 오류:", error));
+			
+		}
+	
+	
+	</script>
+</body>
+</html>

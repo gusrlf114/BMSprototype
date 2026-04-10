@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<h1> user page...</h1>
+	<form id="form1">
+	<input type="text" name="amount" id="amount" placeholder="돈"><br>
+	<button type="button" onclick="deposit()">입금</button>
+	</form>
+	<div id="result1"></div>
+	<hr>
+	
+	<form id="form">
+		<input type="text" name="accountNumber" placeholder="상대계좌"><br>
+		<input type="text" name="amount" placeholder="돈"><br>
+		<button type="button" onclick="transfer()">송금</button>
+	</form>
+	<div id="result2"></div>
+	<hr>
+	
+	<button type="button" onclick="account()">내계좌조회</button>
+	<div id="result3"></div>
+	
+	
+	
+	<script>
+		const form1 =document.querySelector("#form1");
+		const form =document.querySelector("#form");
+		const result1 =document.querySelector("#result1");
+		const result2 =document.querySelector("#result2");
+		const result3 =document.querySelector("#result3");
+		const token =localStorage.getItem("token");
+		
+		//입금하기!!!!!
+		function deposit(){
+			
+			const formData =new FormData(form1);
+			fetch("/api/banking/deposit",{
+				method:"post",
+				headers:{
+					"Authorization": "Bearer "+token
+				},
+				body:formData
+			})
+			.then(res =>{
+				if(res.ok){
+				return res.json()
+				.then(data => {
+					console.log(data);
+					alert(data.message);
+					result1.innerHTML="잔액 :"+data.balance;
+				})
+				}
+				else{
+					return res.json()
+					.then(data =>{
+						console.error(data.error);
+						result1.innerHTML=data.error;
+					})
+				}
+			})
+
+		}
+		
+		//송금하기!!
+		function transfer(){
+			const formData =new FormData(form);
+			const data =Object.fromEntries(formData);
+			
+			fetch("/api/banking/transfer",{
+				method:"post",
+				headers:{
+					"Content-Type": "application/json",          
+		            "Authorization": "Bearer " + token 
+				},
+				body:JSON.stringify(data)
+			})
+			.then(res =>{
+				if(res.ok){
+					return res.json()
+					.then(data => {
+						console.log(data);
+						result2.innerHTML=data.message;
+					})
+				}
+				else{
+					return res.json()
+					.then(data =>{
+						console.error(data.error);
+						result2.innerHTML=data.error;
+					})
+				}
+			})
+		}
+	//==================================
+		//잔액조회+거래내역5회조회
+		function account(){
+			fetch("/api/banking/account",{
+				method:"post",
+				headers:{
+					"Authorization": "Bearer " + token
+				}
+			})
+			.then(res =>res.json())
+			.then(data => {
+
+		        let html = `
+		            <p>잔액: ${data.myBalance}</p>
+		            <table>
+		                <tr>
+		                    <th>보낸이</th>
+		                    <th>받는이</th>
+		                    <th>돈</th>
+		                    <th>거래종류</th>
+		                    <th>거래시간</th>
+		                </tr>
+		        `;
+
+		        data.list.forEach(a => {
+		        	console.log(a);
+		            html += `
+		                <tr>
+		                    <td>${a.sender.id}</td>
+		                    <td>${a.receiver.id}</td>
+		                    <td>${a.amount}</td>
+		                    <td>${a.type}</td>
+		                    <td>${a.createdAt}</td>
+		                </tr>
+		            `;
+		        });
+
+		        html += `</table>`;
+
+		        result3.innerHTML = html;
+		    });
+		}
+		
+		
+		
+	</script>
+	
+	
+</body>
+</html>

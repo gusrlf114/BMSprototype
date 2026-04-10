@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<h1>회원 목록</h1>
+	
+	<table>
+	    <thead>
+	        <tr>
+	            <th>번호</th>
+	            <th>아이디</th>
+	            <th>롤</th>
+	            <th>상세보기</th>
+	        </tr>
+	    </thead>
+	    <tbody id="table"></tbody>
+	</table>
+	
+	
+	
+	
+	<script>
+	const token =localStorage.getItem("token");
+	//전체 조회
+	fetch("/api/admin/members",{
+		method:"get",
+		headers:{
+			"Authorization": "Bearer "+token
+		}
+	})
+	    .then(res => res.json())
+	    .then(data => {
+	        const table = document.getElementById("table");
+	
+	        data.forEach(member => {
+	            const row = `
+	                <tr>
+	                    <td>${member.id}</td>
+	                    <td>${member.username}</td>
+	                    <td>${member.role}</td>
+	                    <td>
+	                        <button onclick="goDetail(${member.id})">보기</button>
+	                    </td>
+	                </tr>
+	            `;
+	            table.innerHTML += row;
+	        });
+	    });
+	
+	function goDetail(id) {
+	    location.href = `/memberdetail?id=${id}`;
+	}
+	</script>
+
+</body>
+</html>
